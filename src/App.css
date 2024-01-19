@@ -5,6 +5,7 @@ header {
 #root {
   background-color: #343434;
   min-height: 100vh;
+  background-image: url(/assets/img/hieroglyphs-bg.png);
 }
 
 select {
