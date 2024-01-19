@@ -4,26 +4,57 @@ import CardComponent from "./component/CardComponent";
 import { useEffect, useState } from "react";
 
 function App() {
-  const baseUrl =
+  let baseUrl =
     "https://db.ygoprodeck.com/api/v7/cardinfo.php?num=500&offset=0";
-  /*    const archetypesUrl = ' https://db.ygoprodeck.com/api/v7/archetypes.php' */
+
+  const archetypesUrl = " https://db.ygoprodeck.com/api/v7/archetypes.php";
+
+  let [listArchetypes, setListArchetypes] = useState([]);
   let [listCards, setListCards] = useState([]);
+  let [selectedArchetype, setSelectedArchetype] = useState("");
+
+  function getUrl(archetype) {
+    return `https://db.ygoprodeck.com/api/v7/cardinfo.php?archetype=${archetype}&num=500&offset=0`;
+  }
+
+  const handleArchetypeChange = (e) => {
+    const selectedArchetype = e.target.value;
+    console.log(selectedArchetype, "selectedArchetype");
+    const newUrl = selectedArchetype ? getUrl(selectedArchetype) : baseUrl;
+    //console.log(`archetype ${selectedArchetype}`);
+
+    setSelectedArchetype(selectedArchetype);
+    getCards(newUrl);
+  };
+
+  function getCards(url) {
+    axios
+      .get(url)
+      .then((response) => {
+        /* recupro i dati delle carte */
+        const cardsData = response.data.data;
+        setListCards(cardsData);
+
+        /*   console.log("cardsData", cardsData); */
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
+  function getArchetypes() {
+    axios.get(archetypesUrl).then((response) => {
+      /* recupero gli archetipi delle carte  */
+      const archetypesData = response.data;
+      setListArchetypes(archetypesData);
+
+      /*  console.log("archetypesData", archetypesData); */
+    });
+  }
 
   useEffect(() => {
-    function getCards() {
-      axios
-        .get(baseUrl)
-        .then((response) => {
-          const cardsData = response.data.data;
-          setListCards(cardsData);
-          console.log("cardsData", cardsData);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
-
-    getCards();
+    getCards(baseUrl);
+    getArchetypes();
     return () => {};
   }, []);
 
@@ -38,18 +69,34 @@ function App() {
           />
           <h1 className=" text-white">YU-GI-OH API</h1>
         </div>
+        <select
+          className="me-3 form-select w-25"
+          name="archetypes"
+          id=""
+          value={selectedArchetype}
+          onChange={handleArchetypeChange}
+        >
+          <option value="">select an archetype</option>
 
-        <select className="me-3 form-select w-25" name="archetypes" id="">
-          <option value="0">seleziona</option>
-          <option value="0">hero</option>
-          <option value="0">hero2</option>
+          {listArchetypes.map((archetype, i) => {
+            /*  console.log(archetype); */
+            return (
+              <option key={i} value={archetype.archetype_name}>
+                {archetype.archetype_name}
+              </option>
+            );
+          })}
         </select>
       </header>
+
       <main>
         <div className="container">
           <div className="row">
+            <div className="text-white">
+              <h1>card found: {listCards.length}</h1>
+            </div>
             {listCards.map((card, i) => {
-              console.log("Card Data:", card.card_images[0].image_url);
+              /* console.log("Card Data:", card.card_images[0].image_url); */
               return (
                 <CardComponent
                   key={i}
