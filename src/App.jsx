@@ -48,7 +48,17 @@ function App() {
       <main>
         <div className="container">
           <div className="row">
-            <CardComponent cardName={"luciano Gomme"} />
+            {listCards.map((card, i) => {
+              console.log("Card Data:", card.card_images[0].image_url);
+              return (
+                <CardComponent
+                  key={i}
+                  cardName={card.name}
+                  cardImg={card.card_images[0].image_url}
+                  cardArchetype={card.archetype}
+                />
+              );
+            })}
           </div>
         </div>
       </main>
